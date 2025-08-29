@@ -1,7 +1,7 @@
 ## Builder: install dependencies into a portable target directory (no venv)
 # Use the slim tag to pick up upstream security fixes; for production pin to a
 # specific digest after scanning (e.g. python:3.12-slim@sha256:...)
-FROM python:3.12-slim AS builder
+FROM python:3.11-slim AS builder
 
 ENV PYTHONDONTWRITEBYTECODE=1 \
     PYTHONUNBUFFERED=1 \
