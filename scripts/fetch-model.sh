@@ -9,7 +9,7 @@ mkdir -p "$(dirname "$OUT_PATH")"
 
 if command -v huggingface-cli >/dev/null 2>&1; then
 	echo "Using hf to download $REPO $FILENAME"
-	hf download "$REPO" "$FILENAME" --local-dir "$(dirname "$OUT_PATH")" --local-dir-use-symlinks False
+	hf download "$REPO" "$FILENAME" --local-dir "$(dirname "$OUT_PATH")"
 else
 	echo "hf not found. Please install it or download manually."
 	exit 1

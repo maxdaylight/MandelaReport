@@ -48,7 +48,7 @@ RUN mkdir -p /models
 RUN if [ -n "$HF_TOKEN" ]; then \
             huggingface-cli login --token "$HF_TOKEN" --add-to-git-credential; \
         fi && \
-        hf download "$HF_REPO" "$HF_FILE" --local-dir /models --local-dir-use-symlinks False
+        hf download "$HF_REPO" "$HF_FILE" --local-dir /models
 
 EXPOSE 8085
 # llama.cpp server image expects flags as CMD/entrypoint args (API server is the default for this image)

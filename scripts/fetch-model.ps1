@@ -14,7 +14,7 @@ if (!(Test-Path $dir)) { New-Item -ItemType Directory -Path $dir | Out-Null }
 
 if ($UseCli) {
   Write-Host "Using hf to download $Repo $Filename"
-  hf download $Repo $Filename --local-dir $dir --local-dir-use-symlinks False
+  hf download $Repo $Filename --local-dir $dir
   if (Test-Path (Join-Path $dir $Filename)) {
     Write-Host "Model downloaded to $dir/$Filename"
     exit 0
