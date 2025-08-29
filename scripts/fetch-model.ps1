@@ -13,13 +13,13 @@ $dir = Split-Path $fullOut
 if (!(Test-Path $dir)) { New-Item -ItemType Directory -Path $dir | Out-Null }
 
 if ($UseCli) {
-  Write-Host "Using huggingface-cli to download $Repo $Filename"
-  huggingface-cli download $Repo $Filename --local-dir $dir --local-dir-use-symlinks False
+  Write-Host "Using hf to download $Repo $Filename"
+  hf download $Repo $Filename --local-dir $dir --local-dir-use-symlinks False
   if (Test-Path (Join-Path $dir $Filename)) {
     Write-Host "Model downloaded to $dir/$Filename"
     exit 0
   } else {
-    Write-Warning "huggingface-cli did not produce expected file; falling back to direct URL if provided."
+    Write-Warning "hf did not produce expected file; falling back to direct URL if provided."
   }
 }
 

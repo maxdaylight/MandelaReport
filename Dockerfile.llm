@@ -44,11 +44,11 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 
 RUN mkdir -p /models
 
-# Download model into /models using huggingface-cli (token optional if private)
+# Download model into /models using hf (token optional if private)
 RUN if [ -n "$HF_TOKEN" ]; then \
             huggingface-cli login --token "$HF_TOKEN" --add-to-git-credential; \
         fi && \
-        huggingface-cli download "$HF_REPO" "$HF_FILE" --local-dir /models --local-dir-use-symlinks False
+        hf download "$HF_REPO" "$HF_FILE" --local-dir /models --local-dir-use-symlinks False
 
 EXPOSE 8085
 # llama.cpp server image expects flags as CMD/entrypoint args (API server is the default for this image)
