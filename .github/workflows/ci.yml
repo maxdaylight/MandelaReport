@@ -1,0 +1,59 @@
+name: CI
+
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.12'
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          # Prefer an exact lockfile if available for reproducible installs
+          if [ -f requirements.lock.txt ]; then
+            pip install -r requirements.lock.txt
+          else
+            pip install -r requirements.txt
+          fi
+
+      - name: Lint (ruff)
+        run: |
+          python -m pip install ruff
+          # Fail job if ruff finds problems; keep --fix to allow minor auto-fixes, but let non-fixable issues fail
+          ruff check . --fix
+
+      - name: Type check (mypy)
+        run: |
+          python -m pip install mypy
+          # Run strict type checks; configure ignores in mypy.ini if needed
+          mypy --ignore-missing-imports src
+
+      - name: Markdown lint (markdownlint-cli)
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - name: Install markdownlint-cli
+        run: |
+          npm install -g markdownlint-cli
+      - name: Run markdownlint
+        run: |
+          markdownlint "**/*.md" || true
+
+      - name: Run tests
+        run: |
+          pytest -q
+
+      - name: Run pip-audit
+        run: |
+          python -m pip install pip-audit
+          # Fail on high severity findings
+          pip-audit --fail-on HIGH

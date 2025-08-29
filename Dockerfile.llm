@@ -1,0 +1,55 @@
+FROM ghcr.io/ggerganov/llama.cpp:server
+
+# This image no longer performs any model downloads at build time to avoid
+# embedding credentials into image layers. Models must be provided via a
+# mounted volume at /models or downloaded at container start by the
+# entrypoint if HF_TOKEN and HF_REPO/HF_FILE are provided.
+
+USER root
+
+RUN apt-get update && apt-get install -y --no-install-recommends \
+        python3 python3-pip ca-certificates curl && \
+    rm -rf /var/lib/apt/lists/* && \
+    pip3 install --no-cache-dir huggingface_hub || true
+
+WORKDIR /app
+
+COPY llm-entrypoint.sh /usr/local/bin/llm-entrypoint.sh
+RUN chmod +x /usr/local/bin/llm-entrypoint.sh
+
+VOLUME ["/models"]
+
+EXPOSE 8085
+
+ENTRYPOINT ["/usr/local/bin/llm-entrypoint.sh"]
+
+# Default args forwarded to the llama.cpp server. Users can override in
+# compose or CLI: e.g. -m /models/<file>.gguf --host 0.0.0.0 --port 8085
+CMD ["-m","/models/tinyllama-1.1b-chat-v1.0.Q4_K_M.gguf","--host","0.0.0.0","--port","8085","-c","4096"]
+FROM ghcr.io/ggerganov/llama.cpp:server
+
+ARG HF_REPO="TheBloke/TinyLlama-1.1B-Chat-v1.0-GGUF"
+ARG HF_FILE="tinyllama-1.1b-chat-v1.0.Q4_K_M.gguf"
+ARG HF_TOKEN=""
+
+ENV HF_REPO=${HF_REPO} \
+        HF_FILE=${HF_FILE} \
+        HF_TOKEN=${HF_TOKEN}
+
+# Install Python and huggingface_hub to fetch model at build time
+RUN apt-get update && apt-get install -y --no-install-recommends \
+            python3 python3-pip ca-certificates curl && \
+        rm -rf /var/lib/apt/lists/* && \
+        pip3 install --no-cache-dir huggingface_hub
+
+RUN mkdir -p /models
+
+# Download model into /models using huggingface-cli (token optional if private)
+RUN if [ -n "$HF_TOKEN" ]; then \
+            huggingface-cli login --token "$HF_TOKEN" --add-to-git-credential; \
+        fi && \
+        huggingface-cli download "$HF_REPO" "$HF_FILE" --local-dir /models --local-dir-use-symlinks False
+
+EXPOSE 8085
+# llama.cpp server image expects flags as CMD/entrypoint args (API server is the default for this image)
+CMD ["-m","/models/tinyllama-1.1b-chat-v1.0.Q4_K_M.gguf","--host","0.0.0.0","--port","8085","-c","4096"]

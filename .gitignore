@@ -1,0 +1,33 @@
+__pycache__/
+*.pyc
+.env
+data/
+models/
+.vscode/
+.venv/
+dist/
+build/
+
+# Python tool caches and test artifacts
+.pytest_cache/
+.mypy_cache/
+.coverage
+coverage/
+.cache/
+
+# Packaging and build metadata
+pip-wheel-metadata/
+*.egg-info/
+
+# Logs
+*.log
+
+# macOS
+.DS_Store
+
+# IDEs
+.idea/
+*.iml
+
+# Node modules (if/when node tooling is added)
+node_modules/

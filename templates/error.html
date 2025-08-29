@@ -1,0 +1,30 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Mandela Report • Oops</title>
+  <link rel="icon" href="/static/favicon.svg" type="image/svg+xml" />
+    <style>
+      body { font-family: system-ui, sans-serif; margin: 2rem; }
+      .card { max-width: 720px; padding: 1.25rem; border: 1px solid #ddd; border-radius: 8px; }
+      h1 { margin-top: 0; font-size: 1.25rem; color: #b33; }
+      .hint { color:#555; }
+      a.button { display:inline-block; margin-top:1rem; padding:.6rem 1rem; border:1px solid #ccc; border-radius:6px; text-decoration:none; }
+    </style>
+  </head>
+  <body>
+    <div class="card">
+  <h1>We couldn't build that Mandela Report</h1>
+      <p class="hint">{{ message }}</p>
+      <h3>Try these fixes:</h3>
+      <ul>
+        <li>Leave the date fields blank to search all years in the Wayback Machine.</li>
+        <li>Double‑check the URL is publicly accessible and archived on web.archive.org.</li>
+        <li>If the live site blocks bots, only Wayback comparisons may be available.</li>
+        <li>Reduce restrictions (fewer path parameters, simpler URL).</li>
+      </ul>
+      <a class="button" href="/">Back to wizard</a>
+    </div>
+  </body>
+  </html>

@@ -1,0 +1,38 @@
+services:
+  app:
+    build: .
+    ports:
+      - "8081:8081"
+    environment:
+      - "APP__USER_AGENT=MandelaReport/0.1 (+mailto:you@example.com)"
+      - APP__REQUEST_TIMEOUT=15
+      - APP__MAX_RESPONSE_MB=5
+      - APP__OBEY_ROBOTS=true
+      - APP__ALLOW_WAYBACK=true
+      - APP__SUMMARY_PROVIDER=${APP__SUMMARY_PROVIDER:-llm}
+      - APP__LLM_BASE_URL=http://llm:8085/v1
+    depends_on:
+      - llm
+    volumes:
+      - data:/app/data
+  llm:
+    build:
+      context: .
+      dockerfile: Dockerfile.llm
+    # Mount a local models directory into the container at /models so large
+    # GGUF files are not baked into the image and secrets are never used at
+    # build-time. Optionally set HF_REPO / HF_FILE / HF_TOKEN env vars to
+    # allow runtime download by the entrypoint (not recommended for prod).
+    volumes:
+      - ./models:/models:ro
+    # Default command is defined by the Dockerfile (CMD); override here if
+    # you want a different model filename or server args.
+    ports:
+      - "8085:8085"
+    deploy:
+      resources:
+        limits:
+          cpus: "2.0"
+          memory: 6g
+volumes:
+  data:

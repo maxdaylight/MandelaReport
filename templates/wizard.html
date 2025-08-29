@@ -1,0 +1,275 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Mandela Report • Mandela</title>
+  <link rel="icon" href="/static/favicon.svg" type="image/svg+xml" />
+    <style>
+      :root { color-scheme: light dark; }
+      /* Mandela Report branding: deep midnight with aurora accents */
+      body { font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif; margin: 0; background: #0a0f1f; color: #e6f0ff; }
+  .container { display:flex; flex-direction:column; height: 100dvh; }
+  header { padding: 1rem 1.25rem; border-bottom: 1px solid #1a2342; background: linear-gradient(90deg, #0d1430, #0b1028); position: sticky; top: 0; }
+  header h1 { margin: 0 auto; max-width: 980px; font-size: 1rem; font-weight: 700; color: #98c1ff; letter-spacing:.2px; display:flex; gap:.6rem; align-items:center; }
+  header h1 img { height:20px; width:auto; flex:0 0 auto; }
+  /* Responsive: shrink logo and hide wordmark on narrow screens */
+  @media (max-width: 520px) {
+    header h1 { gap:.4rem; }
+    header h1 img { height:18px; }
+    header h1 .wordmark { display:none; }
+  }
+  /* Center the main column and limit width to reduce empty space */
+  .chat { flex:1; overflow:auto; padding: 1rem; max-width: 980px; width: 100%; margin: 0 auto; }
+  .bubble { max-width: 820px; padding: .85rem 1rem; border-radius: 12px; margin: .4rem 0; line-height: 1.45; }
+  .bubble.wide { max-width: 980px; }
+      .assistant { background: #121a39; border: 1px solid #223064; box-shadow: 0 0 0 1px rgba(152,193,255,0.1) inset; }
+      .user { background: #182556; border: 1px solid #2b3c7f; margin-left:auto; }
+      .meta { font-size: .8rem; opacity: .8; }
+  form.send { display:flex; gap:.6rem; padding: .75rem; border-top: 1px solid #1a2342; background: #0e1531; max-width: 980px; width: 100%; margin: 0 auto; }
+      form.send input[type=text] { flex:1; padding:.8rem 1rem; border-radius: 10px; border:1px solid #27325e; background:#0b1020; color:#e6f0ff; }
+      form.send button { padding:.8rem 1rem; border-radius:10px; border:1px solid #3760b2; background:#2b4da0; color:#fff; cursor:pointer; }
+      .pill { display:inline-block; font-size:.8rem; padding:.3rem .5rem; border-radius:999px; border:1px solid #2a3e8f; background:#162457; color:#cfe0ff; }
+  .chips { max-width:980px; width:100%; margin: .25rem auto .75rem auto; padding: 0 .75rem; display:flex; flex-wrap:wrap; gap:.4rem .5rem; align-items:center; }
+  .chips .group { display:flex; flex-wrap:wrap; gap:.4rem; align-items:center; }
+  .chip { font-size:.8rem; padding:.35rem .6rem; border-radius:999px; border:1px solid #2a3e8f; background:#0b1436; color:#cfe0ff; cursor:pointer; }
+  .chip:hover { background:#12205a; }
+  .chip[aria-pressed=true] { background:#213a86; border-color:#3a56b4; }
+  .typing { display:inline-flex; gap:4px; align-items:center; }
+  .dot { width:6px; height:6px; border-radius:50%; background:#a7b6ff; opacity:.5; animation: blink 1.2s infinite; }
+  .dot:nth-child(2){ animation-delay: .2s; }
+  .dot:nth-child(3){ animation-delay: .4s; }
+  @keyframes blink { 0%, 80%, 100% { opacity:.2 } 40% { opacity:1 } }
+  .preview-grid { display:grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 12px; margin-top:.5rem; }
+  .preview { position:relative; border:1px solid #27325e; border-radius:10px; overflow:hidden; background:#0b1020; }
+  .preview iframe { width:100%; height:220px; border:0; background:#fff; }
+  .preview a.overlay { position:absolute; inset:0; text-indent:-9999px; }
+  /* Snapshot source badges */
+  .preview .badge { position:absolute; top:8px; left:8px; z-index:2; padding:2px 6px; border-radius:6px; font-size:12px; font-weight:600; line-height:1.2; letter-spacing:.2px; pointer-events:none; }
+  .preview .badge.live { color:#06281f; background:#37e3b2; border:1px solid rgba(0,0,0,0.15); box-shadow: 0 1px 2px rgba(0,0,0,0.25); }
+  .preview .badge.wb { color:#06132e; background:#9ec1ff; border:1px solid rgba(0,0,0,0.15); box-shadow: 0 1px 2px rgba(0,0,0,0.25); }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <header>
+  <h1><img src="/static/favicon.svg" alt="Mandela Report" /> <span class="wordmark">Mandela</span> <span class="pill">beta</span></h1>
+      </header>
+      <div id="chat" class="chat">
+        <div class="bubble assistant">
+          Hello, I’m <strong>Mandela</strong>. I investigate possible <em>Mandela Effects</em>—those curious memories that don’t match what the record shows.
+          Share a page URL, and I’ll compare versions from the Wayback Machine. You can add since/until dates (YYYY-MM-DD) and how many snapshots (3, 5, or 7).
+          I’ll highlight shifts that might explain why memories changed.
+        </div>
+      </div>
+      <form id="send" class="send">
+        <input id="input" type="text" placeholder="e.g., Investigate https://example.com since 2022-01-01 (5 snapshots)" autocomplete="off" />
+        <button type="submit">Send</button>
+      </form>
+      <div id="chips" class="chips" aria-label="Quick options">
+        <div class="group" aria-label="Presets">
+          <button class="chip" data-preset="since-2010" type="button">Since 2010</button>
+          <button class="chip" data-preset="since-2000" type="button">Since 2000</button>
+          <button class="chip" data-preset="past-5y" type="button">Past 5 years</button>
+          <button class="chip" data-preset="last-year" type="button">Last year</button>
+          <button class="chip" data-preset="past-12m" type="button">Past 12 months</button>
+          <button class="chip" data-preset="past-6m" type="button">Past 6 months</button>
+        </div>
+        <div class="group" aria-label="Snapshots">
+          <button class="chip" data-snapshots="3" type="button">3</button>
+          <button class="chip" data-snapshots="5" type="button">5</button>
+          <button class="chip" data-snapshots="7" type="button">7</button>
+        </div>
+        <div class="group" aria-label="Style">
+          <button class="chip" data-style="rule" type="button">rule</button>
+          <button class="chip" data-style="llm" type="button">llm</button>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      const chat = document.getElementById('chat');
+      const form = document.getElementById('send');
+      const input = document.getElementById('input');
+      let slots = {};
+  let typingEl = null;
+
+      function addBubble(text, who='assistant'){
+        const div = document.createElement('div');
+        div.className = `bubble ${who}`;
+        div.textContent = text;
+        chat.appendChild(div);
+        chat.scrollTop = chat.scrollHeight;
+      }
+
+      function addHtmlBubble(html, who='assistant', extraClass=''){
+        const div = document.createElement('div');
+        div.className = `bubble ${who} ${extraClass}`.trim();
+        div.innerHTML = html;
+        chat.appendChild(div);
+        chat.scrollTop = chat.scrollHeight;
+      }
+
+      function showTyping(){
+        hideTyping();
+        const div = document.createElement('div');
+        div.className = 'bubble assistant';
+        div.innerHTML = `<span class="typing"><span class="dot"></span><span class="dot"></span><span class="dot"></span></span>`;
+        chat.appendChild(div);
+        chat.scrollTop = chat.scrollHeight;
+        typingEl = div;
+      }
+
+      function hideTyping(){
+        if(typingEl && typingEl.parentNode){ typingEl.parentNode.removeChild(typingEl); }
+        typingEl = null;
+      }
+
+      async function talk(message){
+    showTyping();
+    const res = await fetch('/assistant', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ message, slots })
+        });
+    hideTyping();
+    if(!res.ok){ addBubble('Sorry, something went wrong.'); return; }
+        const data = await res.json();
+        slots = data.slots || {};
+  if(data.reply) addBubble(data.reply, 'assistant');
+    // Show parsed slots as helpful context
+    const pills = [];
+    if(slots.url) pills.push(`<span class="pill">URL: ${slots.url}</span>`);
+    if(slots.since) pills.push(`<span class="pill">Since: ${slots.since}</span>`);
+    if(slots.until) pills.push(`<span class="pill">Until: ${slots.until}</span>`);
+    if(slots.snapshots) pills.push(`<span class="pill">Snapshots: ${slots.snapshots}</span>`);
+    if(slots.style) pills.push(`<span class="pill">Style: ${slots.style}</span>`);
+    if(pills.length) addHtmlBubble(pills.join(' '), 'assistant');
+        if(data.ready){
+          // Create the report inline via the JSON API so we can keep the chat context
+          const payload = {
+            url: slots.url,
+            since: slots.since || null,
+            until: slots.until || null,
+            snapshots: slots.snapshots || 5
+          };
+          try {
+      showTyping();
+      const resp = await fetch('/diff', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify(payload)
+            });
+      hideTyping();
+      if(!resp.ok){
+              const errText = await resp.text();
+              addBubble('I could not create the report with those details. Please try tweaking the dates or snapshots.');
+              return;
+            }
+            const dj = await resp.json();
+            const snaps = dj.snapshots || [];
+            const notices = dj.notices || [];
+            const list = snaps.map(s => {
+              const isLive = s.source === 'live';
+              const viewLabel = isLive ? 'Live' : 'Wayback';
+              const view = s.view_url ? `<a href="${s.view_url}" target="_blank">${viewLabel}</a>` : '';
+              const cap = s.report_url ? `<a href="${s.report_url}" target="_blank">Captured</a>` : '';
+              const sep = view && cap ? ' | ' : '';
+              return `<li><strong>${s.when}</strong> — ${s.source}${view || cap ? ': ' : ''}${view}${sep}${cap}</li>`;
+            }).join('');
+            const reportLink = `<a href="/report/${dj.report_id}${slots.style ? `?style=${encodeURIComponent(slots.style)}` : ''}" target="_blank">Open full report</a>`;
+            // Build preview grid: prefer local captured HTML, fallback to Wayback
+            const previews = snaps.map(s => {
+              const purl = s.report_url || s.view_url;
+              if(!purl) return '';
+              const openUrl = s.report_url || s.view_url;
+        const isLive = s.source === 'live';
+  return `
+    <div class="preview">
+    <span class="badge ${isLive ? 'live' : 'wb'}" aria-label="${isLive ? 'Live snapshot' : 'Wayback snapshot'}" title="${isLive ? 'Live snapshot' : 'Wayback snapshot'}">${isLive ? 'Live' : 'WB'}</span>
+      <!-- sandboxed iframe without 'allow-scripts' to reduce XSS risk; allow-forms kept for basic interaction where needed -->
+      <iframe src="${purl}" sandbox="allow-forms" loading="lazy" referrerpolicy="no-referrer"></iframe>
+    <a class="overlay" href="${openUrl}" target="_blank" rel="noopener noreferrer" aria-label="Open ${isLive ? 'live' : 'Wayback'} snapshot">Open snapshot</a>
+    </div>
+        `;
+            }).join('');
+            const noteHtml = notices.length ? `<div class="meta">Notes:</div><ul>${notices.map(n=>`<li>${n}</li>`).join('')}</ul>` : '';
+            const html = `
+              <div class="meta">Report ready. ${reportLink}</div>
+              <div style="white-space:pre-wrap; margin:.5rem 0 0.5rem 0;">${(dj.summary || '').replace(/</g,'&lt;')}</div>
+              ${noteHtml}
+              <div class="meta">Snapshots:</div>
+              <ul>${list}</ul>
+              <div class="meta">Previews (click to open in a new tab):</div>
+              <div class="preview-grid">${previews}</div>
+            `;
+            addHtmlBubble(html, 'assistant', 'wide');
+          } catch (e) {
+      hideTyping();
+            addBubble('Something went wrong creating the report.');
+          }
+        }
+      }
+
+      form.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const text = input.value.trim();
+        if(!text) return;
+        addBubble(text, 'user');
+        input.value='';
+        await talk(text);
+      });
+
+      // Quick-reply chips handlers
+      function handlePreset(p){
+        const lower = String(p || '').toLowerCase();
+        let msg = '';
+        if(lower === 'since-2010'){
+          slots.since = '2010-01-01';
+          slots.until = null;
+          msg = 'since 2010';
+        } else if(lower === 'since-2000'){
+          slots.since = '2000-01-01';
+          slots.until = null;
+          msg = 'since 2000';
+        } else if(lower === 'past-5y'){
+          slots.until = null; msg = 'past 5 years';
+        } else if(lower === 'last-year'){
+          slots.until = null; msg = 'since last year';
+        } else if(lower === 'past-12m'){
+          slots.until = null; msg = 'past 12 months';
+        } else if(lower === 'past-6m'){
+          slots.until = null; msg = 'past 6 months';
+        }
+        if(msg){ addBubble(msg, 'user'); talk(msg); }
+      }
+      function handleSnapshots(n){
+        const num = parseInt(n,10);
+        if(num && (num===3||num===5||num===7)){
+          slots.snapshots = num;
+          const msg = `${num} snapshots`;
+          addBubble(msg, 'user');
+          talk(msg);
+        }
+      }
+      function handleStyle(st){
+        if(st==='rule' || st==='llm'){
+          slots.style = st;
+          const msg = `style ${st}`;
+          addBubble(msg, 'user');
+          talk(msg);
+        }
+      }
+      document.getElementById('chips').addEventListener('click', (e) => {
+        const el = e.target.closest('.chip');
+        if(!el) return;
+        const preset = el.getAttribute('data-preset');
+        const snaps = el.getAttribute('data-snapshots');
+        const style = el.getAttribute('data-style');
+        if(preset) return handlePreset(preset);
+        if(snaps) return handleSnapshots(snaps);
+        if(style) return handleStyle(style);
+      });
+    </script>
+  </body>
+  </html>

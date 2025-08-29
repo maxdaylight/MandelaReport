@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="64" height="64" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Mandela Report">
+  <!-- Compact infinity timeline glyph -->
+  <defs>
+    <linearGradient id="fg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#7aa8ff"/>
+      <stop offset="100%" stop-color="#b6d0ff"/>
+    </linearGradient>
+  </defs>
+  <rect x="4" y="4" width="56" height="56" rx="12" fill="#0d1430"/>
+  <path d="M14,32 C14,24 20,18 27,18 C33,18 37,22 40,26 C43,30 46,34 51,34 C55,34 58,31 58,27 C58,23 55,20 51,20" stroke="url(#fg)" stroke-width="3" fill="none" stroke-linecap="round"/>
+  <path d="M14,32 C14,40 20,46 27,46 C33,46 37,42 40,38 C43,34 46,30 51,30 C55,30 58,33 58,37 C58,41 55,44 51,44" stroke="url(#fg)" stroke-width="3" fill="none" stroke-linecap="round"/>
+</svg>
