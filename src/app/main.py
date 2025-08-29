@@ -16,13 +16,20 @@ from src.core.extract import extract_title_text
 from src.core.fetch import fetch_live
 from src.core.summarize import summarize_changes
 from src.core.wayback import fetch_archive_html, pick_snapshots
-from src.storage.db import (create_report, get_report, get_snapshot_html,
-                            init_db, list_snapshots, purge_old_reports,
-                            save_snapshot)
+from src.storage.db import (
+    create_report,
+    get_report,
+    get_snapshot_html,
+    init_db,
+    list_snapshots,
+    purge_old_reports,
+    save_snapshot,
+)
 from src.storage.db import vacuum as db_vacuum
 
 env = Environment(
-    loader=FileSystemLoader("templates"), autoescape=select_autoescape(["html", "xml"])
+    loader=FileSystemLoader("templates"),
+    autoescape=select_autoescape(["html", "xml"]),
 )
 
 app = FastAPI(title="Mandela Report", version="0.1.0")

@@ -3,16 +3,19 @@ repos:
     rev: v0.12.9
     hooks:
       - id: ruff
-        args: ["check", "."]
+        # don't pass explicit "check ." here; pre-commit will invoke ruff with the
+        # staged filenames. Passing `check` and `.` can make ruff treat them as a
+        # filename on Windows/UNC paths and produce E902 (os error 2).
+        # args: ["check", "."]
+  - repo: https://github.com/PyCQA/isort
+    rev: 5.12.0
+    hooks:
+      - id: isort
   - repo: https://github.com/psf/black
     rev: 24.10.0
     hooks:
       - id: black
         language_version: python3
-  - repo: https://github.com/PyCQA/isort
-    rev: 5.12.0
-    hooks:
-      - id: isort
   - repo: https://github.com/pre-commit/pre-commit-hooks
     rev: v4.4.0
     hooks:
